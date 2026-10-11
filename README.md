@@ -2,6 +2,8 @@
 
 Harry Wu · APAN PS5560 · Applied Generative AI
 
+Repository: [ShikiRyo1/apan5560-assignment2](https://github.com/ShikiRyo1/apan5560-assignment2)
+
 I implemented the CNN specified in the assignment and added image classification to my previous FastAPI application. The repository includes the trained checkpoint, so running the API does not require training or downloading a model at startup. The previous `/embedding` and `/generate` routes are still available.
 
 ## Run with Docker
