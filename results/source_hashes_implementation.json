@@ -1,0 +1,13 @@
+{
+  "app/__init__.py": "2c112e4784171fcd6d7161cbb0b335735e8a1ffdaf907ac1c5876942f52802ee",
+  "app/bigram_model.py": "15ead281bc25af1f34d1c32361df8c17c40ac27cdd8af87b9e4633c83a820086",
+  "app/classifier.py": "1907c0582536eca06d3eee20300df7ba168cbfcba531a318df85a0318aa97dbb",
+  "app/cnn.py": "c7f2c5c4f72b88197be87a24020f70b0546ca49a47b85afd1011412f5502529b",
+  "app/embeddings.py": "4d952dbca9803dfee08b75320ede0cc383bab5dee2be12a3edb90eb1fb1eeada",
+  "app/main.py": "ccea00dd254d198d660cf010cb0a860a8b7d2def2550c2e350e2eb203541e92a",
+  "app/preprocessing.py": "07245a17d52ad2089768c3e6825af3575fecf8c44e43e542bb2faae6e49d12a4",
+  "app/schemas.py": "ebab174add0ed90dd994316a30b1097f8e2e5322b9d961a632613d066c90cd42",
+  "scripts/__init__.py": "8fc7c9ba88b278231b69bcd43686b06cc3e36414629e56aabd130f88128c7a4b",
+  "scripts/plot_results.py": "3d9628ac63dedaddf48dca52a27f0bc9ab1b3980f188c8976943c2efec7a65aa",
+  "scripts/train.py": "664836a18c3a1a9ac6e203d3581c7755021344ad0dd2296657afcc0aa4e455f5"
+}

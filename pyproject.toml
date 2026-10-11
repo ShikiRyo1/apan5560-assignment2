@@ -1,0 +1,36 @@
+[project]
+name = "assignment2-cifar10-api"
+version = "2.0.0"
+description = "Specified CIFAR-10 CNN with the existing FastAPI embedding and generator endpoints"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.141.1",
+    "uvicorn==0.54.0",
+    "spacy==3.8.16",
+    "en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl#sha256=293e9547a655b25499198ab15a525b05b9407a75f10255e405e8c3854329ab63",
+    "torch==2.11.0",
+    "pillow==12.3.0",
+    "numpy==2.5.3",
+    "python-multipart==0.0.22",
+]
+
+[dependency-groups]
+dev = ["httpx==0.28.1", "pytest==9.1.1"]
+train = ["torchvision==0.26.0", "matplotlib==3.11.2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]

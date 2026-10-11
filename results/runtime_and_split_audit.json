@@ -1,0 +1,36 @@
+{
+  "training_runtime_versions": {
+    "torch": "2.11.0+cu128",
+    "torchvision": "0.26.0+cu128",
+    "pillow": "12.3.0",
+    "numpy": "2.5.2",
+    "matplotlib": "3.11.2"
+  },
+  "python_version": "3.12.13 (main, Apr  7 2026, 20:53:22) [MSC v.1944 64 bit (AMD64)]",
+  "class_counts": {
+    "train": [
+      4500,
+      4500,
+      4500,
+      4500,
+      4500,
+      4500,
+      4500,
+      4500,
+      4500,
+      4500
+    ],
+    "validation": [
+      500,
+      500,
+      500,
+      500,
+      500,
+      500,
+      500,
+      500,
+      500,
+      500
+    ]
+  }
+}
