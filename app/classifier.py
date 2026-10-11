@@ -44,7 +44,7 @@ def decode_image(content: bytes) -> Image.Image:
         raise
     except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
         raise ImageLimitError("Image dimensions exceed the decoding limit.") from exc
-    except (UnidentifiedImageError, OSError, SyntaxError, ValueError, StructError) as exc:
+    except (UnidentifiedImageError, OSError, SyntaxError, ValueError, StructError, TypeError) as exc:
         raise InvalidImageError("The file could not be decoded as a PNG or JPEG image.") from exc
 
 
@@ -75,7 +75,7 @@ class ImageClassifier:
         original_size = list(image.size)
         try:
             tensor = image_to_tensor(image)
-        except (OSError, SyntaxError, ValueError, StructError) as exc:
+        except (OSError, SyntaxError, ValueError, StructError, TypeError) as exc:
             raise InvalidImageError("The image pixels or metadata could not be processed.") from exc
         with torch.inference_mode():
             scores = self.model(tensor).softmax(dim=1)[0]

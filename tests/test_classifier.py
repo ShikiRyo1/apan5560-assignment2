@@ -182,3 +182,14 @@ def test_model_fault_is_not_mislabeled_as_invalid_upload(client, monkeypatch):
     content = (ROOT / "examples/cat.png").read_bytes()
     with pytest.raises(ValueError, match="simulated internal model fault"):
         client.post("/classify", files={"file": ("cat.png", content, "image/png")})
+
+
+def test_text_xmp_type_mismatch_returns_client_error(client):
+    # PNG text can use the reserved xmp key, which Pillow expects to contain bytes.
+    info = PngImagePlugin.PngInfo()
+    info.add_text("xmp", 'tiff:Orientation="6"')
+    buffer = BytesIO()
+    Image.new("RGB", (32, 32)).save(buffer, format="PNG", pnginfo=info)
+    response = client.post("/classify", files={"file": ("xmp.png", buffer.getvalue(), "image/png")})
+    assert response.status_code == 422
+    assert "metadata could not be processed" in response.json()["detail"]

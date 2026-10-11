@@ -1,7 +1,7 @@
 {
   "app/__init__.py": "2c112e4784171fcd6d7161cbb0b335735e8a1ffdaf907ac1c5876942f52802ee",
   "app/bigram_model.py": "15ead281bc25af1f34d1c32361df8c17c40ac27cdd8af87b9e4633c83a820086",
-  "app/classifier.py": "c3bb67058f7122c4aea04320da2fdb01a27dbb249bb36ccb8f0b8b2c28afa233",
+  "app/classifier.py": "064576891931ef0e687d5e362ab500b05da91555e1ab5530abcf27a8e6313277",
   "app/cnn.py": "c7f2c5c4f72b88197be87a24020f70b0546ca49a47b85afd1011412f5502529b",
   "app/embeddings.py": "4d952dbca9803dfee08b75320ede0cc383bab5dee2be12a3edb90eb1fb1eeada",
   "app/main.py": "ccea00dd254d198d660cf010cb0a860a8b7d2def2550c2e350e2eb203541e92a",

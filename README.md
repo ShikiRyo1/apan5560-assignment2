@@ -1,6 +1,6 @@
 # Assignment 2: CIFAR-10 classifier
 
-Harry Wu · APAN PS5560 · Applied Generative AI
+Harry Wu 路 APAN PS5560 路 Applied Generative AI
 
 Repository: [ShikiRyo1/apan5560-assignment2](https://github.com/ShikiRyo1/apan5560-assignment2)
 
@@ -15,7 +15,7 @@ docker build -t assignment2 .
 docker run --rm --name assignment2 -p 127.0.0.1:8000:8000 assignment2
 ```
 
-Open <http://127.0.0.1:8000/docs>. Expand **POST /classify**, select **Try it out**, choose `examples/cat.png`, then select **Execute**. The JSON response contains `class_name`, its softmax score, and scores for all ten classes. The image is resized by the server; the upload does not need to be 64 × 64.
+Open <http://127.0.0.1:8000/docs>. Expand **POST /classify**, select **Try it out**, choose `examples/cat.png`, then select **Execute**. The JSON response contains `class_name`, its softmax score, and scores for all ten classes. The image is resized by the server; the upload does not need to be 64 脳 64.
 
 The first Docker build needs internet access for Python packages and the spaCy model retained from Assignment 1. The trained CNN is copied from `models/cifar10_cnn.pt`. The container runs on CPU and requires no GPU, local Python installation, account, or API key. Startup loads the spaCy vectors and CNN once; allow time for the first health response. The default `/docs` page loads its Swagger assets from a CDN, while the API itself performs inference offline.
 
@@ -39,11 +39,11 @@ An alternative is `docker compose up --build`; stop it with `docker compose down
 
 | Layer | Output per image | Trainable parameters |
 |---|---:|---:|
-| RGB input | 3 × 64 × 64 | 0 |
-| Conv2d, 16 filters, 3 × 3, stride 1, padding 1 | 16 × 64 × 64 | 448 |
-| ReLU, MaxPool2d 2 × 2, stride 2 | 16 × 32 × 32 | 0 |
-| Conv2d, 32 filters, 3 × 3, stride 1, padding 1 | 32 × 32 × 32 | 4,640 |
-| ReLU, MaxPool2d 2 × 2, stride 2 | 32 × 16 × 16 | 0 |
+| RGB input | 3 脳 64 脳 64 | 0 |
+| Conv2d, 16 filters, 3 脳 3, stride 1, padding 1 | 16 脳 64 脳 64 | 448 |
+| ReLU, MaxPool2d 2 脳 2, stride 2 | 16 脳 32 脳 32 | 0 |
+| Conv2d, 32 filters, 3 脳 3, stride 1, padding 1 | 32 脳 32 脳 32 | 4,640 |
+| ReLU, MaxPool2d 2 脳 2, stride 2 | 32 脳 16 脳 16 | 0 |
 | Flatten | 8,192 | 0 |
 | Linear, 100 units, ReLU | 100 | 819,300 |
 | Linear, 10 units | 10 logits | 1,010 |
@@ -51,7 +51,7 @@ An alternative is `docker compose up --build`; stop it with `docker compose down
 
 The model follows the worksheet without adding BatchNorm, Dropout, or extra layers. Both convolutions and linear layers include a bias. PyTorch uses NCHW input order, so one image becomes `[1, 3, 64, 64]`.
 
-CIFAR-10 images start at 32 × 32. Training and serving use the same preprocessing functions: correct EXIF orientation when present, convert to RGB, resize to 64 × 64 with Pillow bilinear interpolation, put channels first, and normalize each channel with `(pixel / 255 - 0.5) / 0.5`. The constants are fixed; no test-set statistics are used. Resizing makes the input match the assignment but does not add image detail.
+CIFAR-10 images start at 32 脳 32. Training and serving use the same preprocessing functions: correct EXIF orientation when present, convert to RGB, resize to 64 脳 64 with Pillow bilinear interpolation, put channels first, and normalize each channel with `(pixel / 255 - 0.5) / 0.5`. The constants are fixed; no test-set statistics are used. Resizing makes the input match the assignment but does not add image detail.
 
 The final layer returns logits. Training passes those logits directly to `CrossEntropyLoss`. At inference, softmax converts them to ten scores and argmax chooses the class. The returned `confidence` is the largest softmax score, not a calibrated probability of being correct.
 
@@ -100,7 +100,7 @@ These examples are the first test image of each true class, chosen by index. The
 | `GET /embedding?word=apple` | One alphabetic word | The existing 300-dimensional spaCy vector |
 | `POST /generate` | `{"start_word":"the","length":5}` | Text from the existing course bigram generator |
 
-The classification route accepts at most 5 MiB and 20 million decoded pixels. It checks the decoded file format rather than trusting the filename or MIME label. Missing, empty, corrupt, and unsupported images return HTTP 422; uploads beyond the byte or pixel limit return HTTP 413. PNG metadata rejected by Pillow's decoding limits and malformed EXIF also return 422. Grayscale and RGBA inputs are converted to RGB. Classification always returns one of the ten known classes; it does not detect out-of-distribution inputs.
+The classification route accepts at most 5 MiB and 20 million decoded pixels. It checks the decoded file format rather than trusting the filename or MIME label. Missing, empty, corrupt, and unsupported images return HTTP 422; uploads beyond the byte or pixel limit return HTTP 413. PNG metadata rejected by Pillow's decoding limits and malformed EXIF/XMP also return 422. Grayscale and RGBA inputs are converted to RGB. Classification always returns one of the ten known classes; it does not detect out-of-distribution inputs.
 
 ## Local setup and tests
 
@@ -114,7 +114,7 @@ uv run --frozen uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 The lockfile resolves CPU PyTorch for Windows/Linux. Tests check architecture shapes and parameter count, gradients, preprocessing, validation-based checkpoint selection, split integrity, real checkpoint HTTP predictions, error handling, and the existing word-vector/text-generation behavior. Prediction checks use the actual trained checkpoint.
 
-The final local run passed **49 tests** in 22.45 seconds. The tests include malformed EXIF and compressed PNG metadata, and verify that an internal model fault is not mislabeled as an invalid upload. `results/pytest_results.xml` stores the results; the run had one upstream Starlette warning about a future test-client transport change, with no failing tests. `results/runtime_and_split_audit.json` records the actual training-library versions and verifies 4,500 training / 500 validation images in each class. The source hashes in `results/source_hashes_implementation.json` use UTF-8 file bytes with LF line endings; normalize CRLF to LF before comparing a Windows checkout.
+The final local run passed **50 tests** in 7.00 seconds. The tests include malformed EXIF/XMP and compressed PNG metadata, and verify that an internal model fault is not mislabeled as an invalid upload. `results/pytest_results.xml` stores the results; the run had one upstream Starlette warning about a future test-client transport change, with no failing tests. `results/runtime_and_split_audit.json` records the actual training-library versions and verifies 4,500 training / 500 validation images in each class. The source hashes in `results/source_hashes_implementation.json` use UTF-8 file bytes with LF line endings; normalize CRLF to LF before comparing a Windows checkout.
 
 To retrain on CPU in the locked environment (this replaces the model and result files):
 
