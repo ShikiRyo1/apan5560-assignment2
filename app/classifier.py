@@ -3,6 +3,7 @@
 import hashlib
 from io import BytesIO
 from pathlib import Path
+from struct import error as StructError
 import warnings
 
 from PIL import Image, UnidentifiedImageError
@@ -39,9 +40,11 @@ def decode_image(content: bytes) -> Image.Image:
                     raise ImageLimitError("Decoded image must have no more than 20 million pixels.")
                 source.load()
                 return source.copy()
+    except (InvalidImageError, ImageLimitError):
+        raise
     except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
         raise ImageLimitError("Image dimensions exceed the decoding limit.") from exc
-    except (UnidentifiedImageError, OSError, SyntaxError) as exc:
+    except (UnidentifiedImageError, OSError, SyntaxError, ValueError, StructError) as exc:
         raise InvalidImageError("The file could not be decoded as a PNG or JPEG image.") from exc
 
 
@@ -70,7 +73,10 @@ class ImageClassifier:
     def classify(self, content: bytes) -> dict:
         image = decode_image(content)
         original_size = list(image.size)
-        tensor = image_to_tensor(image)
+        try:
+            tensor = image_to_tensor(image)
+        except (OSError, SyntaxError, ValueError, StructError) as exc:
+            raise InvalidImageError("The image pixels or metadata could not be processed.") from exc
         with torch.inference_mode():
             scores = self.model(tensor).softmax(dim=1)[0]
         predicted_id = int(scores.argmax())

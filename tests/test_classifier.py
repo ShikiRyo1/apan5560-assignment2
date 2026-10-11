@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, PngImagePlugin
 import pytest
 import torch
 from torch import nn
@@ -136,3 +136,49 @@ def test_model_metadata_and_openapi(client):
     spec = client.get("/openapi.json").json()
     operation = spec["paths"]["/classify"]["post"]
     assert "multipart/form-data" in operation["requestBody"]["content"]
+
+
+@pytest.mark.parametrize("metadata_kind", ["zTXt", "iTXt", "iCCP"])
+def test_compressed_metadata_limits_return_client_error(client, metadata_kind):
+    # Small files can exceed Pillow's decompressed metadata limit before pixel loading.
+    text = "x" * (PngImagePlugin.MAX_TEXT_CHUNK + 1)
+    info = PngImagePlugin.PngInfo()
+    kwargs = {}
+    if metadata_kind == "zTXt":
+        info.add_text("comment", text, zip=True)
+    elif metadata_kind == "iTXt":
+        info.add_itxt("comment", text, zip=True)
+    else:
+        kwargs["icc_profile"] = text.encode()
+    buffer = BytesIO()
+    Image.new("RGB", (32, 32)).save(buffer, format="PNG", pnginfo=info, **kwargs)
+    content = buffer.getvalue()
+    assert len(content) < 2048
+    response = client.post("/classify", files={"file": ("metadata.png", content, "image/png")})
+    assert response.status_code == 422
+    assert "could not be decoded" in response.json()["detail"]
+
+
+@pytest.mark.parametrize("raw_exif", ["zz", "49492a00"])
+def test_malformed_exif_after_pixel_decode_returns_client_error(client, raw_exif):
+    # Non-hex text raises ValueError; a truncated TIFF header raises struct.error.
+    info = PngImagePlugin.PngInfo()
+    info.add_text("Raw profile type exif", "header\nexif\nsize\n" + raw_exif)
+    buffer = BytesIO()
+    Image.new("RGB", (32, 32)).save(buffer, format="PNG", pnginfo=info)
+    content = buffer.getvalue()
+    with Image.open(BytesIO(content)) as source:
+        source.load()  # The failure occurs later, during EXIF-aware preprocessing.
+    response = client.post("/classify", files={"file": ("exif.png", content, "image/png")})
+    assert response.status_code == 422
+    assert "metadata could not be processed" in response.json()["detail"]
+
+
+def test_model_fault_is_not_mislabeled_as_invalid_upload(client, monkeypatch):
+    def fail_forward(*args, **kwargs):
+        raise ValueError("simulated internal model fault")
+
+    monkeypatch.setattr(client.app.state.classifier.model, "forward", fail_forward)
+    content = (ROOT / "examples/cat.png").read_bytes()
+    with pytest.raises(ValueError, match="simulated internal model fault"):
+        client.post("/classify", files={"file": ("cat.png", content, "image/png")})

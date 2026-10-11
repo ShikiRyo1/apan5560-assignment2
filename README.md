@@ -100,7 +100,7 @@ These examples are the first test image of each true class, chosen by index. The
 | `GET /embedding?word=apple` | One alphabetic word | The existing 300-dimensional spaCy vector |
 | `POST /generate` | `{"start_word":"the","length":5}` | Text from the existing course bigram generator |
 
-The classification route accepts at most 5 MiB and 20 million decoded pixels. It checks the decoded file format rather than trusting the filename or MIME label. Missing, empty, corrupt, and unsupported images return HTTP 422; oversized images return HTTP 413. Grayscale and RGBA inputs are converted to RGB. Classification always returns one of the ten known classes; it does not detect out-of-distribution inputs.
+The classification route accepts at most 5 MiB and 20 million decoded pixels. It checks the decoded file format rather than trusting the filename or MIME label. Missing, empty, corrupt, and unsupported images return HTTP 422; uploads beyond the byte or pixel limit return HTTP 413. PNG metadata rejected by Pillow's decoding limits and malformed EXIF also return 422. Grayscale and RGBA inputs are converted to RGB. Classification always returns one of the ten known classes; it does not detect out-of-distribution inputs.
 
 ## Local setup and tests
 
@@ -112,9 +112,9 @@ uv run --frozen pytest -q
 uv run --frozen uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-The lockfile resolves CPU PyTorch for Windows/Linux. Tests check architecture shapes and parameter count, gradients, preprocessing, validation-based checkpoint selection, split integrity, real checkpoint HTTP predictions, error handling, and the existing word-vector/text-generation behavior. They do not substitute a mock classifier for the trained model.
+The lockfile resolves CPU PyTorch for Windows/Linux. Tests check architecture shapes and parameter count, gradients, preprocessing, validation-based checkpoint selection, split integrity, real checkpoint HTTP predictions, error handling, and the existing word-vector/text-generation behavior. Prediction checks use the actual trained checkpoint.
 
-The recorded local run passed **43 tests** in 65.56 seconds. `results/pytest_results.xml` stores the results; the run had one upstream Starlette warning about a future test-client transport change, with no failing tests. `results/runtime_and_split_audit.json` records the actual training-library versions and verifies 4,500 training / 500 validation images in each class.
+The final local run passed **49 tests** in 22.45 seconds. The tests include malformed EXIF and compressed PNG metadata, and verify that an internal model fault is not mislabeled as an invalid upload. `results/pytest_results.xml` stores the results; the run had one upstream Starlette warning about a future test-client transport change, with no failing tests. `results/runtime_and_split_audit.json` records the actual training-library versions and verifies 4,500 training / 500 validation images in each class. The source hashes in `results/source_hashes_implementation.json` use UTF-8 file bytes with LF line endings; normalize CRLF to LF before comparing a Windows checkout.
 
 To retrain on CPU in the locked environment (this replaces the model and result files):
 
