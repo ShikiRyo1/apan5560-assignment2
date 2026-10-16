@@ -1,6 +1,6 @@
 # Assignment 2: CIFAR-10 classifier
 
-Harry Wu 路 APAN PS5560 路 Applied Generative AI
+Harry Wu | APAN PS5560 | Applied Generative AI
 
 Repository: [ShikiRyo1/apan5560-assignment2](https://github.com/ShikiRyo1/apan5560-assignment2)
 
@@ -15,7 +15,7 @@ docker build -t assignment2 .
 docker run --rm --name assignment2 -p 127.0.0.1:8000:8000 assignment2
 ```
 
-Open <http://127.0.0.1:8000/docs>. Expand **POST /classify**, select **Try it out**, choose `examples/cat.png`, then select **Execute**. The JSON response contains `class_name`, its softmax score, and scores for all ten classes. The image is resized by the server; the upload does not need to be 64 脳 64.
+Open <http://127.0.0.1:8000/docs>. Expand **POST /classify**, select **Try it out**, choose `examples/cat.png`, then select **Execute**. The JSON response contains `class_name`, its softmax score, and scores for all ten classes. The image is resized by the server; the upload does not need to be 64 x 64.
 
 The first Docker build needs internet access for Python packages and the spaCy model retained from Assignment 1. The trained CNN is copied from `models/cifar10_cnn.pt`. The container runs on CPU and requires no GPU, local Python installation, account, or API key. Startup loads the spaCy vectors and CNN once; allow time for the first health response. The default `/docs` page loads its Swagger assets from a CDN, while the API itself performs inference offline.
 
@@ -39,11 +39,11 @@ An alternative is `docker compose up --build`; stop it with `docker compose down
 
 | Layer | Output per image | Trainable parameters |
 |---|---:|---:|
-| RGB input | 3 脳 64 脳 64 | 0 |
-| Conv2d, 16 filters, 3 脳 3, stride 1, padding 1 | 16 脳 64 脳 64 | 448 |
-| ReLU, MaxPool2d 2 脳 2, stride 2 | 16 脳 32 脳 32 | 0 |
-| Conv2d, 32 filters, 3 脳 3, stride 1, padding 1 | 32 脳 32 脳 32 | 4,640 |
-| ReLU, MaxPool2d 2 脳 2, stride 2 | 32 脳 16 脳 16 | 0 |
+| RGB input | 3 x 64 x 64 | 0 |
+| Conv2d, 16 filters, 3 x 3, stride 1, padding 1 | 16 x 64 x 64 | 448 |
+| ReLU, MaxPool2d 2 x 2, stride 2 | 16 x 32 x 32 | 0 |
+| Conv2d, 32 filters, 3 x 3, stride 1, padding 1 | 32 x 32 x 32 | 4,640 |
+| ReLU, MaxPool2d 2 x 2, stride 2 | 32 x 16 x 16 | 0 |
 | Flatten | 8,192 | 0 |
 | Linear, 100 units, ReLU | 100 | 819,300 |
 | Linear, 10 units | 10 logits | 1,010 |
@@ -51,7 +51,7 @@ An alternative is `docker compose up --build`; stop it with `docker compose down
 
 The model follows the worksheet without adding BatchNorm, Dropout, or extra layers. Both convolutions and linear layers include a bias. PyTorch uses NCHW input order, so one image becomes `[1, 3, 64, 64]`.
 
-CIFAR-10 images start at 32 脳 32. Training and serving use the same preprocessing functions: correct EXIF orientation when present, convert to RGB, resize to 64 脳 64 with Pillow bilinear interpolation, put channels first, and normalize each channel with `(pixel / 255 - 0.5) / 0.5`. The constants are fixed; no test-set statistics are used. Resizing makes the input match the assignment but does not add image detail.
+CIFAR-10 images start at 32 x 32. Training and serving use the same preprocessing functions: correct EXIF orientation when present, convert to RGB, resize to 64 x 64 with Pillow bilinear interpolation, put channels first, and normalize each channel with `(pixel / 255 - 0.5) / 0.5`. The constants are fixed; no test-set statistics are used. Resizing makes the input match the assignment but does not add image detail.
 
 The final layer returns logits. Training passes those logits directly to `CrossEntropyLoss`. At inference, softmax converts them to ten scores and argmax chooses the class. The returned `confidence` is the largest softmax score, not a calibrated probability of being correct.
 
